@@ -3,6 +3,5 @@ requests==2.22.0
 pandas==1.0.1
 python_whois==0.7.3
 mechanize==0.4.5
-~==mpy
 numpy==1.19.1
 whois==0.9.7
