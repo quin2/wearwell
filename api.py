@@ -52,7 +52,7 @@ def getBrand(itemURL):
 	return None, None, "Couldn't find brand:("
 
 app = Flask(__name__)
-#app.df = pd.read_csv("brandScores.csv")
+app.df = pd.read_csv("brandScores.csv")
 
 @app.route('/')
 def index():
