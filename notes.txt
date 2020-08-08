@@ -1,0 +1,11 @@
+def whoisQueryLocal(itemURL):
+	#try 1: get brand from WHOIS org lookup. can be inconsistant but most apis charge $$$
+	w = whois.whois(itemURL)
+	if w["org"] is not None: #if there's an org listed
+		org = w["org"]
+		match = difflib.get_close_matches(org, df.brand)
+		if len(match) >= 1:
+			return match[0]
+	pass
+	
+fix err for invalid url

@@ -1,16 +1,16 @@
-import json
-from flask import Flask, jsonify, Response, request, current_app
-
 import whois
+import pandas as pd
 import difflib
 import requests
 
 from mechanize import Browser
 
-import pandas as pd
-import numpy as np 
+import numpy as np
 
+
+df = pd.read_csv("brandScores.csv")
 apiKey = "at_eFtokGi0dpEWpC2XDyQrbonLLkvFp" #switch to env variables before deploy..
+
 
 def whoisQueryAPI(itemURL):
 	url = "https://www.whoisxmlapi.com/whoisserver/WhoisService"
@@ -24,10 +24,10 @@ def whoisQueryAPI(itemURL):
 	return org
 
 def getBrand(itemURL):
-	df = current_app.df
+	
 	org = whoisQueryAPI(itemURL)
 	if org is not None:
-		match = difflib.get_close_matches(org, app.df.brand)
+		match = difflib.get_close_matches(org, df.brand)
 		if len(match) >= 1:
 			return match[0], df[df.brand == match[0]].score.values[0], None
 		matc = [x in org for x in df.brand]
@@ -51,31 +51,19 @@ def getBrand(itemURL):
 
 	return None, None, "Couldn't find brand:("
 
-app = Flask(__name__)
-app.df = pd.read_csv("brandScores.csv")
-
-@app.route('/')
-def index():
-	return "usage: send website URL as {url: 'https://example.com'} to /v1/score and get sustainability info back"
-
-@app.route('/v1/score', methods=['POST'])
-def susScore():
-	#load from request
-	data = request.json
-	toScrape = data['url']
-
-	brand, score, err = getBrand(toScrape)
-
-	if err is not None:
-		return jsonify (
-			message=err,
-		)
-
-	return jsonify (
-			brand=brand,
-			score=score
-		)
 
 
-if __name__ == '__main__':
-	app.run(host="0.0.0.0", debug=True, port=80)
+itemURL = "https://us.romwe.com/Guys-Butterfly-Shirt-p-645202-cat-858.html?scici=GuysHomePage~~ON_Banner,CN_catlist0421,HZ_Shirts,HI_hotZonevw54qyki61~~4_3~~real_858~~RPcCccGuysHomepage_default_5182~~~~50001"
+lulu = "https://shop.lululemon.com/p/men-shorts/Pace-Breaker-Short-Linerless/_/prod5020227?color=0001&sz=M"
+prana = "https://www.prana.com/p/vaha-short/M3VAHS116.html?dwvar_M3VAHS116_color=Russet"
+
+
+br = getBrand(itemURL)
+#print(br)
+
+br = getBrand(lulu)
+print(br)
+
+br = getBrand(prana)
+print(br)
+
