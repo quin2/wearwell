@@ -5,3 +5,4 @@ python_whois==0.7.3
 mechanize==0.4.5
 numpy==1.19.1
 whois==0.9.7
+gunicorn==19.9.0
