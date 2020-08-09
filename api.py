@@ -144,8 +144,7 @@ def matScore():
 	data = request.json
 	toScrape = data['url']
 	material = data['materials']
-
-	print(material)
+	material = material[0]
 
 	brand, score, err = getBrand(toScrape)
 
