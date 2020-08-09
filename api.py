@@ -28,6 +28,22 @@ def whoisQueryAPI(itemURL):
 
 def getBrand(itemURL):
 	df = current_app.df
+
+	#check header for brand name first
+	br = Browser()
+	br.set_handle_robots(False)
+	#fake UA so we don't look like a bot
+	br.addheaders = [('User-agent', 'Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.0.1) Gecko/2008071615 Fedora/3.0.1-1.fc9 Firefox/3.0.1')]
+	br.open(itemURL)
+	try2 = br.title()
+	br.close()
+
+	matc = [x in try2 for x in df.brand]
+	find = np.where(matc)[0]
+	if len(find) > 0:
+		return df.iloc[find[0]].brand, df.iloc[find[0]].score, None
+
+	#check whois for holding co if we have to (some brands are owned by others)
 	org = whoisQueryAPI(itemURL)
 	if org is not None:
 		if org == "bad record":
@@ -40,32 +56,34 @@ def getBrand(itemURL):
 		if len(find) > 0:
 			return df.iloc[find[0]].brand, df.iloc[find[0]].score, None
 
-
-	#check header next...
-	br = Browser()
-	br.set_handle_robots(False)
-	br.addheaders = [('User-agent', 'Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.0.1) Gecko/2008071615 Fedora/3.0.1-1.fc9 Firefox/3.0.1')]
-	br.open(itemURL)
-	try2 = br.title()
-	br.close()
-
-	matc = [x in try2 for x in df.brand]
-	find = np.where(matc)[0]
-	if len(find) > 0:
-		return df.iloc[find[0]].brand, df.iloc[find[0]].score
-
+	#otherwise we can't find the brand
 	return None, None, "Couldn't find brand:("
+
+def getMaterials(materials):
+	df = current_app.mat
+
+	def format(x):
+		mats = {}
+		mats['material'] = x
+		em = df[df['name']==x]['score-emission'].values[0]
+		en = df[df['name']==x]['score-energy'].values[0]
+		#can change this later...
+		mats['sIndex'] = 50 - (em + en)
+
+		return mats
+	return [format(x) for x in materials]
 
 app = Flask(__name__)
 app.df = pd.read_csv("brandScores.csv")
+app.mat = pd.read_csv("fabricScores.csv")
 app.whois_key = os.environ.get('WHOISXMLAPI')
 app.whois_key_2 = os.environ.get('WHOISXMLAPI2')
 
 @app.route('/')
 def index():
-	return "usage: send website URL as {url: 'https://example.com'} to /v1/score and get sustainability info back"
+	return "made with <3 for wearwell. more info: https://github.com/quin2/wearwell"
 
-@app.route('/v1/score', methods=['POST'])
+@app.route('/v1/brand', methods=['POST'])
 def susScore():
 	#load from request
 	data = request.json
@@ -74,15 +92,25 @@ def susScore():
 	brand, score, err = getBrand(toScrape)
 
 	if err is not None:
-		return jsonify (
-			message=err,
-		)
+		return jsonify (message=err,)
 
-	return jsonify (
-			brand=brand,
-			score=score
-		)
+	return jsonify (brand=brand, score=score,)
 
+@app.route('/v1/score', methods=['POST'])
+def matScore():
+	#load from request
+	data = request.json
+	toScrape = data['url']
+	material = data['materials']
+
+	brand, score, err = getBrand(toScrape)
+
+	data = getMaterials(material)
+
+	if err is not None:
+		return jsonify (message=err, material=data)
+
+	return jsonify (brand=brand, brandScore=score, material=data)
 
 if __name__ == '__main__':
 	app.run(host="0.0.0.0", debug=True, port=80)
