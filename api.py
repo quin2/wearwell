@@ -60,6 +60,33 @@ def getBrand(itemURL):
 	#otherwise we can't find the brand
 	return None, None, "Couldn't find brand:("
 
+def getBrand2(itemURL, header):
+	df = current_app.df
+
+	try2 = header
+
+	matc = [x in try2 for x in df.brand]
+	find = np.where(matc)[0]
+	if len(find) > 0:
+		return df.iloc[find[0]].brand, df.iloc[find[0]].score, None
+
+
+	#check whois for holding co if we have to (some brands are owned by others)
+	org = whoisQueryAPI(itemURL)
+	if org is not None:
+		if org == "bad record":
+			return None, None, "Invalid URL"
+		match = difflib.get_close_matches(org, app.df.brand)
+		if len(match) >= 1:
+			return match[0], df[df.brand == match[0]].score.values[0], None
+		matc = [x in org for x in df.brand]
+		find = np.where(matc)[0]
+		if len(find) > 0:
+			return df.iloc[find[0]].brand, df.iloc[find[0]].score, None
+
+	#otherwise we can't find the brand
+	return None, None, "Couldn't find brand:("
+
 def getMaterials(materials):
 	df = current_app.mat
 
@@ -91,6 +118,20 @@ def susScore():
 	toScrape = data['url']
 
 	brand, score, err = getBrand(toScrape)
+
+	if err is not None:
+		return jsonify (message=err,)
+
+	return jsonify (brand=brand, score=score,)
+
+@app.route('/v2/brand', methods=['POST'])
+def susScore2():
+	#load from request
+	data = request.json
+	toScrape = data['url']
+	header = data['header']
+
+	brand, score, err = getBrand2(toScrape, header)
 
 	if err is not None:
 		return jsonify (message=err,)
