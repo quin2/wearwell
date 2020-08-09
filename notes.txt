@@ -8,7 +8,6 @@ def whoisQueryLocal(itemURL):
 			return match[0]
 	pass
 	
-fix err for invalid url
 move prod keys to env
 
 use this:

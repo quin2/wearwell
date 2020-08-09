@@ -9,8 +9,6 @@ import numpy as np
 
 
 df = pd.read_csv("brandScores.csv")
-apiKey = "at_eFtokGi0dpEWpC2XDyQrbonLLkvFp" #switch to env variables before deploy..
-
 
 def whoisQueryAPI(itemURL):
 	url = "https://www.whoisxmlapi.com/whoisserver/WhoisService"

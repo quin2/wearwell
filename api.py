@@ -10,11 +10,14 @@ from mechanize import Browser
 import pandas as pd
 import numpy as np 
 
-apiKey = "at_eFtokGi0dpEWpC2XDyQrbonLLkvFp" #switch to env variables before deploy..
+import os
+import random
 
 def whoisQueryAPI(itemURL):
+	kuse = random.choice([current_app.whois_key, current_app.whois_key_2])
+
 	url = "https://www.whoisxmlapi.com/whoisserver/WhoisService"
-	PARAMS = {'apiKey':apiKey, 'domainName': itemURL, 'outputFormat': 'JSON'}
+	PARAMS = {'apiKey':kuse, 'domainName': itemURL, 'outputFormat': 'JSON'}
 	r = requests.get(url = url, params = PARAMS) 
 	data = r.json() 
 	if 'dataError' in data['WhoisRecord']:
@@ -55,6 +58,8 @@ def getBrand(itemURL):
 
 app = Flask(__name__)
 app.df = pd.read_csv("brandScores.csv")
+app.whois_key = os.environ.get('WHOISXMLAPI')
+app.whois_key_2 = os.environ.get('WHOISXMLAPI2')
 
 @app.route('/')
 def index():
