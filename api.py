@@ -145,6 +145,8 @@ def matScore():
 	toScrape = data['url']
 	material = data['materials']
 
+	print(material)
+
 	brand, score, err = getBrand(toScrape)
 
 	data = getMaterials(material)
