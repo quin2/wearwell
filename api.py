@@ -152,7 +152,7 @@ def matScore():
 	data = []
 
 	if material is not None:
-		if len(material > 0):
+		if len(material) > 0:
 			data = getMaterials(material)
 
 	if err is not None:
