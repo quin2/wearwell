@@ -17,16 +17,18 @@ def whoisQueryAPI(itemURL):
 	PARAMS = {'apiKey':apiKey, 'domainName': itemURL, 'outputFormat': 'JSON'}
 	r = requests.get(url = url, params = PARAMS) 
 	data = r.json() 
+	if 'dataError' in data['WhoisRecord']:
+		return "bad record"
 	if 'organization' in data['WhoisRecord']['registrant']:
-		org = data['WhoisRecord']['registrant']['organization']
-	else:
-		org = None
-	return org
+		return data['WhoisRecord']['registrant']['organization']
+	return None
 
 def getBrand(itemURL):
 	df = current_app.df
 	org = whoisQueryAPI(itemURL)
 	if org is not None:
+		if org == "bad record":
+			return None, None, "Invalid URL"
 		match = difflib.get_close_matches(org, app.df.brand)
 		if len(match) >= 1:
 			return match[0], df[df.brand == match[0]].score.values[0], None
