@@ -44,7 +44,7 @@ Typical Response:
 ```
 
 ## Getting the material array
-You might be wondering how to get the list of materials the product is made of! Because we're not doing any scaping on our end (too many ecomm sites have anti-scraping measures and aren't static to boot), you'll have to run a little JavaScript stub on your side, if you want to build an extension with this. That stub is as follows (where result is the materials in the garment we have data on, to be sent to the API):
+You might be wondering how to get the list of materials the product is made of! Because we're not doing any scaping on our end (too many ecomm sites have anti-scraping measures and aren't static), you'll have to run a little JavaScript stub on your side, if you want to build an extension with this. That stub is as follows (where result is the materials in the garment we have data on, to be sent to the API):
 ```
 const result = ["cotton","polyester","hemp","organic cotton","wool","nylon"].filter(m=>document.documentElement.innerText.indexOf(m)>-1)
 ```

@@ -33,7 +33,7 @@ def getBrand(itemURL):
 	br = Browser()
 	br.set_handle_robots(False)
 	#fake UA so we don't look like a bot
-	br.addheaders = [('User-agent', 'Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.0.1) Gecko/2008071615 Fedora/3.0.1-1.fc9 Firefox/3.0.1')]
+	br.addheaders = [('User-agent', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.1.2 Safari/605.1.15')]
 	br.open(itemURL)
 	try2 = br.title()
 	br.close()
@@ -42,6 +42,7 @@ def getBrand(itemURL):
 	find = np.where(matc)[0]
 	if len(find) > 0:
 		return df.iloc[find[0]].brand, df.iloc[find[0]].score, None
+
 
 	#check whois for holding co if we have to (some brands are owned by others)
 	org = whoisQueryAPI(itemURL)
