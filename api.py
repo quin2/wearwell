@@ -143,10 +143,11 @@ def matScore():
 	#load from request
 	data = request.json
 	toScrape = data['url']
+	header = data['header']
 	material = data['materials']
 	material = material[0]
 
-	brand, score, err = getBrand(toScrape)
+	brand, score, err = getBrand2(toScrape, header)
 
 	data = getMaterials(material)
 
