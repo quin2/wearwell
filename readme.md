@@ -5,11 +5,12 @@ This is the API that the Wearwell Chrome extension uses to calculate sustainabil
 
 ## Mini-docs
 No key needed :)
-* brand transparency index: `/v1/brand`
+* brand transparency index: `/v2/brand`
 ```
 POST
 {
 	"url": "https://example.com"
+	"header": "title-tag-from-example.com"
 }
 
 Typical Response:
@@ -23,7 +24,8 @@ Typical Response:
 POST
 {
 	"url": "https://example.com",
-	"Materials": ["Wool", "Cotton"]
+	"materials": ["Wool", "Cotton"],
+	"header": "title-tag-from-example.com"
 }
 
 Typical Response:
