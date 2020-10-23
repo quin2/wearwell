@@ -13,6 +13,8 @@ import numpy as np
 import os
 import random
 
+import psycopg2
+
 def whoisQueryAPI(itemURL):
 	kuse = random.choice([current_app.whois_key, current_app.whois_key_2])
 
@@ -107,6 +109,23 @@ app.mat = pd.read_csv("fabricScores.csv")
 app.whois_key = os.environ.get('WHOISXMLAPI')
 app.whois_key_2 = os.environ.get('WHOISXMLAPI2')
 
+app.dbName = "wearwell"
+app.dbUser = os.environ.get("PGUSER") 
+app.dbPass = os.environ.get("PGPASS")
+app.dbPort = os.environ.get("PGPORT")
+app.dbHost = os.environ.get("PGHOST")
+
+@app.before_first_request
+def dbConn():
+	app.conn = psycopg2.connect(
+		host=app.dbHost, 
+		database=app.dbName, 
+		user=app.dbUser, 
+		password=app.dbPass, 
+		port=app.dbPort
+	)
+    
+
 @app.route('/')
 def index():
 	return "made with <3 for wearwell. more info: https://github.com/quin2/wearwell"
@@ -149,11 +168,27 @@ def matScore():
 
 	brand, score, err = getBrand2(toScrape, header)
 
-	data = []
+	data = [] #should default to None in the future, but i'm not sure what the extension expects. I'll keep is for now.
 
+	#just return mat score if we can't find brand
 	if material is not None:
 		if len(material) > 0:
 			data = getMaterials(material)
+
+	#write everything to db
+	
+	sql = """ 
+		INSERT INTO products(product_url, product_header, brand_name, total_score, materials)
+		VALUES (%s, %s, %s, %s, %s);
+	"""
+	try: 
+		cur = app.conn.cursor()
+		cur.execute(sql, (toScrape, header, brand, score, data))
+		app.conn.commit()
+		cur.close()
+	except (Exception, psycopg2.DatabaseError) as error: 
+		#future: restart server and recommit IF connection is bad!
+		print(error)
 
 	if err is not None:
 		return jsonify (message=err, material=data)
