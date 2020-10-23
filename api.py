@@ -12,6 +12,7 @@ import numpy as np
 
 import os
 import random
+import urllib.parse as urlparse
 
 import psycopg2
 
@@ -109,6 +110,7 @@ app.mat = pd.read_csv("fabricScores.csv")
 app.whois_key = os.environ.get('WHOISXMLAPI')
 app.whois_key_2 = os.environ.get('WHOISXMLAPI2')
 
+#fix in future...will not run on local machine!
 app.dbName = "wearwell"
 app.dbUser = os.environ.get("PGUSER") 
 app.dbPass = os.environ.get("PGPASS")
@@ -117,15 +119,9 @@ app.dbHost = os.environ.get("PGHOST")
 
 @app.before_first_request
 def dbConn():
-	app.conn = psycopg2.connect(
-		host=app.dbHost, 
-		database=app.dbName, 
-		user=app.dbUser, 
-		password=app.dbPass, 
-		port=app.dbPort
-	)
-    
-
+	DATABASE_URL = os.environ['DATABASE_URL']
+	app.conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+	    
 @app.route('/')
 def index():
 	return "made with <3 for wearwell. more info: https://github.com/quin2/wearwell"
